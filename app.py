@@ -14,6 +14,7 @@ driver = AsyncGraphDatabase.driver(db_uri, auth=(api_username, api_password), da
 app = Flask(__name__)
 loop = asyncio.get_event_loop()
 
+
 @app.errorhandler(Exception)
 def error_handler(error):
     status_code = getattr(error, 'code', 500)  # Get the status code if available
@@ -344,5 +345,10 @@ async def get_department_employees_route(department_id):
             return jsonify(employees)
     except Exception as e:
         raise Exception("Unable to get department employees", e)
+
+
+@app.route('/', methods=['GET'])
+async def root_route():
+    return "Welcome to the great Flask App!"
 
 asgi_app = WsgiToAsgi(app)
