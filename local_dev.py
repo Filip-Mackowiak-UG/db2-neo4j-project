@@ -1,19 +1,22 @@
 import os
 import traceback
 import asyncio
+import uvicorn
 from flask import Flask, jsonify, request
 from neo4j import AsyncGraphDatabase
 from dotenv import load_dotenv
 from asgiref.wsgi import WsgiToAsgi
 
 load_dotenv()
-db_uri = os.environ.get("NEO4J_URI")
-api_username = os.environ.get("NEO4J_USERNAME")
-api_password = os.environ.get("NEO4J_PASSWORD")
+db_uri = os.getenv("NEO4J_URI")
+api_username = os.getenv("NEO4J_USERNAME")
+api_password = os.getenv("NEO4J_PASSWORD")
 driver = AsyncGraphDatabase.driver(db_uri, auth=(api_username, api_password), database="neo4j")
 app = Flask(__name__)
 loop = asyncio.get_event_loop()
 
+
+# TOSEE: Możliwe że później trzeba będzie to zmienić na os.environ.get('FLASK_ENV') przy deploy
 @app.errorhandler(Exception)
 def error_handler(error):
     status_code = getattr(error, 'code', 500)  # Get the status code if available
@@ -366,3 +369,6 @@ async def get_department_employees_route(department_id):
         raise Exception("Unable to get department employees", e)
 
 asgi_app = WsgiToAsgi(app)
+
+if __name__ == '__main__':
+    uvicorn.run(asgi_app, host="0.0.0.0", port=5000, loop='asyncio', workers=2, log_level='info')
