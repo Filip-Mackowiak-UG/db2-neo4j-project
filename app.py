@@ -70,26 +70,6 @@ async def get_employees_route():
         raise Exception("Can't get employees", e)
 
 
-@app.route('/employees/time', methods=['GET'])
-async def get_employees_route_sec():
-    await asyncio.sleep(10)
-    filter_params = {
-        'first_name': request.args.get('first_name', default=None, type=str),
-        'last_name': request.args.get('last_name', default=None, type=str),
-        'position': request.args.get('position', default=None, type=str),
-        'salary': request.args.get('salary', default=None, type=float),
-    }
-
-    order_by_params = request.args.getlist('order_by')
-
-    try:
-        async with driver.session() as session:
-            employees = await session.execute_read(lambda tx: get_employees(tx, filter_params, order_by_params))
-            return jsonify(employees)
-    except Exception as e:
-        raise Exception("Can't get employees", e)
-
-
 async def find_department(tx, department_name):
     query = "MATCH (d:Department {name: $department_name}) RETURN d"
     result = await tx.run(query, department_name=department_name)
